@@ -29,7 +29,9 @@ from pyproj import Proj, transform
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
+# Variable file
 from CommContentProcessingVariables import *
+
 
 def get_data(service_url, token):
     payload = {
@@ -156,7 +158,7 @@ def process_tchop(dump):
 
         for card in mix['cards']:
 
-            print(card)
+            # print(card)
             card_id = str(card['id'])
             card_type = card['type']
             card_posted_time = card['postedTime'][0:19]
@@ -180,7 +182,7 @@ def process_tchop(dump):
                     card_text = ''
 
                 if card_type == 'image':
-                    card_image_url = card['image']['tablet']['jpg']
+                    card_image_url = card['image']['phone']['jpg']
                 elif card_type == 'video':
                     card_video_url = card['video']['url']
                 card_exif = card[card_type]['exif']
@@ -190,16 +192,24 @@ def process_tchop(dump):
                 card_headline = card['quotePerson']
                 card_text = card['quote']
 
-                card_image_url = card['image']['tablet']['jpg']
-                card_exif = card['image']['exif']
+                if 'image' in card:
+                    card_image_url = card['image']['phone']['jpg']
+                    card_exif = card['image']['exif']
+                else:
+                    card_image_url = ''
+                    card_exif = ''
 
             elif card_type == 'article':
                 card_url = card['url']
                 card_headline = card['title']
                 card_text = card['abstract']
 
-                card_image_url = card['image']['tablet']['jpg']
-                card_exif = card['image']['exif']
+                if 'image' in card:
+                    card_image_url = card['image']['phone']['jpg']
+                    card_exif = card['image']['exif']
+                else:
+                    card_image_url = ''
+                    card_exif = ''
 
             # print('id: %s, type: %s, headline: %s' % (card_id, card_type, card_headline))
 
