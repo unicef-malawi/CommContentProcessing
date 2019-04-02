@@ -118,15 +118,9 @@ def update_google_sheet(sheet, sheet_content, sheet_id_list, content_list):
                 # First meaningful post is line 3 in the Google Sheet
                 row_to_update = sheet_id_list.index(unique_id) + ONLINE_CONTENT_FIRST_POST_ROW
 
-                print(row_to_update)
-
                 update_range = ONLINE_CONTENT_UPDATE_RANGE % (row_to_update, row_to_update)
 
-                print(update_range)
-
                 value_range_body['range'] = update_range
-
-                print(value_range_body)
 
                 response = sheet.values().update(spreadsheetId=ONLINE_CONTENT_SPREADSHEET_ID,
                                                  range=update_range,
