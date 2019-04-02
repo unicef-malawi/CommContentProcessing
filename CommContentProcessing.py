@@ -109,14 +109,24 @@ def update_google_sheet(sheet, sheet_content, sheet_id_list, content_list):
 
         # If already existing information, update content
         else:
-            # Row to update: add 2 to account for header and index difference between list and sheet
-            row_to_update = sheet_id_list.index(unique_id) + 2
 
             current_values = sheet_content[sheet_id_list.index(unique_id)][0:len(content)]
 
             if current_values != content:
+
+                # Row to update: add 2 to account for header and index difference between list and sheet
+                # First meaningful post is line 3 in the Google Sheet
+                row_to_update = sheet_id_list.index(unique_id) + ONLINE_CONTENT_FIRST_POST_ROW
+
+                print(row_to_update)
+
                 update_range = ONLINE_CONTENT_UPDATE_RANGE % (row_to_update, row_to_update)
+
+                print(update_range)
+
                 value_range_body['range'] = update_range
+
+                print(value_range_body)
 
                 response = sheet.values().update(spreadsheetId=ONLINE_CONTENT_SPREADSHEET_ID,
                                                  range=update_range,
@@ -497,16 +507,17 @@ def process_wordpress(wordpress):
 def sheet_to_feature(row):
 
     # No latitude/longitude for YouTube
-    if len(row) == ONLINE_CONTENT_SORT_END_COLUMN_INDEX - 1:
+    if len(row) == ONLINE_CONTENT_SORT_END_COLUMN_INDEX - ONLINE_CONTENT_OTHER_COLUMNS:
         # Transform longitude and latitude from WGS84 to Web Mercator
         # EPSG:4326 -> WGS 84 -- WGS84 - World Geodetic System 1984
         # EPSG:3857 -> WGS 84 / Pseudo-Mercator -- Spherical Mercator
-        if row[11] != '0' or row[12] != '0':
-            result = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'), float(row[12]), float(row[11]))
+        if row[ONLINE_CONTENT_LATITUDE_ROW] != '0' or row[ONLINE_CONTENT_LONGITUDE_ROW] != '0':
+            result = transform(Proj(init='epsg:4326'), Proj(init='epsg:3857'),
+                               float(row[ONLINE_CONTENT_LONGITUDE_ROW]), float(row[ONLINE_CONTENT_LATITUDE_ROW]))
             longitude_proj = round(result[0], 2)
             latitude_proj = round(result[1], 2)
-            longitude_gcs = float(row[12])
-            latitude_gcs = float(row[11])
+            longitude_gcs = float(row[ONLINE_CONTENT_LONGITUDE_ROW])
+            latitude_gcs = float(row[ONLINE_CONTENT_LATITUDE_ROW])
         else:
             longitude_proj = 0
             latitude_proj = 0
@@ -738,7 +749,7 @@ def main():
             id_logging_done = False
 
             for attrib in existing_feature_info:
-                if attrib not in ['objectid', 'SHAPE', 'globalid']:
+                if attrib not in ['objectid', 'SHAPE', 'globalid', 'tag']:
                     if existing_feature_info[attrib] != new_feature['attributes'][attrib]:
                         modification_list[attrib] = new_feature['attributes'][attrib]
 
